@@ -1,6 +1,6 @@
 {
-  "name": "scrapedin",
-  "version": "1.0.21",
+  "name": "@mvegter/scrapedin",
+  "version": "1.0.22",
   "description": "linkedin scraper for 2020 website",
   "keywords": [
     "linkedin",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/linkedtales/scrapedin"
+    "url": "git+https://github.com/linkedtales/scrapedin.git"
   },
   "bugs": {
     "url": "https://github.com/linkedtales/scrapedin/issues"
@@ -38,5 +38,6 @@
   },
   "engines": {
     "node": ">= 7.6.0"
-  }
+  },
+  "homepage": "https://github.com/linkedtales/scrapedin#readme"
 }
