@@ -12,7 +12,6 @@ const agents = [
 
 module.exports = ({ browser, cookies, url, puppeteerAuthenticate }) => new Promise( async (resolve, reject) => {
   const page = await browser.newPage()
-  page.on('error', err => {reject(err)})
 
   if (cookies) {
     await page.setCookie(...cookies)
