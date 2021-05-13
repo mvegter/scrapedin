@@ -15,9 +15,9 @@ const template = {
     }
   },
   about: {
-    selector: 'section.summary.pp-section',
+    selector: '.pv-about-section',
     fields: {
-      text: 'p'
+      text: 'div'
     }
   },
   positions: {
