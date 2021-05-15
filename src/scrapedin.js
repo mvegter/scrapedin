@@ -10,12 +10,12 @@ module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToG
   }
   logger.info('initializing')
 
-  let browser;
-  if(endpoint){
+  let browser
+  if (endpoint) {
     browser = await puppeteer.connect({
-      browserWSEndpoint: endpoint,
-    });
-  }else{
+      browserWSEndpoint: endpoint
+    })
+  } else {
     const args = Object.assign({ headless: isHeadless, args: ['--no-sandbox'] }, puppeteerArgs)
     browser = await puppeteer.launch(args)
   }
@@ -28,7 +28,7 @@ module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToG
     try {
       await login(browser, email, password, logger)
     } catch (e) {
-      if(!endpoint){
+      if (!endpoint) {
         await browser.close()
       }
       throw e
@@ -37,5 +37,5 @@ module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToG
     logger.warn('email/password and cookies wasn\'t provided, only public data will be collected')
   }
 
-  return (url, waitMs) => url.includes('/school/') || url.includes('/company/') ? company(browser, cookies, url, waitMs, hasToGetContactInfo, puppeteerAuthenticate) :profile(browser, cookies, url, waitMs, hasToGetContactInfo, puppeteerAuthenticate)
+  return (url, waitMs) => url.includes('/school/') || url.includes('/company/') ? company(browser, cookies, url, waitMs, hasToGetContactInfo, puppeteerAuthenticate) : profile(browser, cookies, url, waitMs, hasToGetContactInfo, puppeteerAuthenticate)
 }

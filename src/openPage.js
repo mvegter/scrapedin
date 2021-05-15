@@ -28,5 +28,5 @@ module.exports = async ({ browser, cookies, url, puppeteerAuthenticate }) => {
   }
 
   await page.goto(url)
-  return page;
+  return page
 }
