@@ -6,7 +6,7 @@ const template = {
     fields: {
       name: `.pv-text-details__left-panel:first-child h1`,
       headline: `.pv-text-details__left-panel:first-child .text-body-medium`,
-      location: `.pv-text-details__left-panel:first-child .pb2`,
+      location: `.pv-text-details__left-panel:first-child .pb2 span`,
       connections: `.pv-top-card--list span`,
       imageurl: {
 		    selector: `img.pv-top-card__photo`,
@@ -166,7 +166,7 @@ const template = {
     }
   },
   languages: {
-    selector: '.pv-accomplishments-section',
+    selector: '.pv-accomplishments-block.languages li',
     fields: {
       name: '.pv-accomplishment-entity__title',
       proficiency: '.pv-accomplishment-entity__proficiency',
@@ -179,7 +179,7 @@ const template = {
       date: '.pv-accomplishment-entity__date',
       description: '.pv-accomplishment-entity__description',
       link: {
-        selector: '.pv-accomplishment-entity__external-source',
+        selector: '.mt4',
         attribute: 'href'
       }
     }
