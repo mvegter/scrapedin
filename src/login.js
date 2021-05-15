@@ -7,7 +7,6 @@ module.exports = async (browser, email, password) => {
   const page = await openPage({ browser, url })
   logger.info(`logging at: ${url}`)
 
-  await page.goto(url)
   await page.waitForSelector('#username')
 
   await page.$('#username')

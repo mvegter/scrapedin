@@ -12,6 +12,7 @@ const agents = [
 
 module.exports = async ({ browser, cookies, url, puppeteerAuthenticate }) => {
   const page = await browser.newPage()
+  await page.setDefaultNavigationTimeout(0)
 
   if (cookies) {
     await page.setCookie(...cookies)
@@ -27,6 +28,6 @@ module.exports = async ({ browser, cookies, url, puppeteerAuthenticate }) => {
     await page.authenticate(puppeteerAuthenticate)
   }
 
-  await page.goto(url)
+  await page.goto(url, { waitUntil: 'load' })
   return page
 }
