@@ -8,7 +8,7 @@ module.exports = (profile) => {
     throw new Error(messageError)
   }
 
-  profile.profile.summary = profile.about.text
+  profile.profile.summary = profile?.about?.text
 
   profile.positions.forEach((position) => {
     if(position.title){
