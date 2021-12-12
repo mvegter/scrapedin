@@ -24,6 +24,11 @@ module.exports = (profile) => {
         if(role.title) {
           role.title = role.title.replace('Title\n', '')
         }
+        if (role.date) {
+          role.date1 = role.date.replace('·', '-').split('-')[0].trim()
+          role.date2 = role.date.replace('·', '-').split('-')[1].trim()
+          delete role.date
+        }
         if(role.description) {
           role.description = role.description.replace('See more', '')
           role.description = role.description.replace('see more', '')

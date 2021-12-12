@@ -21,7 +21,7 @@ const template = {
     }
   },
   positions: {
-    selector: '#experience-section li:not(.pv-entity__position-group-role-item)',
+    selector: 'section[id$="EXPERIENCE-en-US"] li.artdeco-list__item',
     fields: {
       title: 'h3',
       link: {
@@ -32,7 +32,7 @@ const template = {
         selector: 'a',
         attribute: 'href'
       },
-      companyName: '.pv-entity__secondary-title',
+      companyName: 'span.t-bold span',
       location: '.pv-entity__location span:last-child',
       description: '.pv-entity__description',
       date1: '.pv-entity__date-range span:last-child',
@@ -41,10 +41,9 @@ const template = {
         selector: 'li',
         hasChildrenFields: true,
         fields: {
-          title: 'h3',
+          title: 'span.t-bold span:last-child',
           description: '.pv-entity__description',
-          date1: '.pv-entity__date-range span:last-child',
-          date2: '.pv-entity__bullet-item-v2',
+          date: '.t-14.t-normal:last-child span:first-child',
           location: '.pv-entity__location span:last-child'
         }
       }
