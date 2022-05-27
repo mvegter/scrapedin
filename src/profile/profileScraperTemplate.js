@@ -21,7 +21,7 @@ const template = {
     }
   },
   positions: {
-    selector: 'section[id$="EXPERIENCE-en-US"] li.artdeco-list__item',
+    selector: 'div[id="experience"] + div + div li.artdeco-list__item',
     fields: {
       title: 'h3',
       link: {
