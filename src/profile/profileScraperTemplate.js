@@ -2,14 +2,14 @@ const profileSelector = '.core-rail > *:first-child section >'
 
 const template = {
   profile: {
-    selector: '.pv-top-card',
+    selector: '.pb5',
     fields: {
-      name: `.pv-text-details__left-panel:first-child h1`,
-      headline: `.pv-text-details__left-panel:first-child .text-body-medium`,
-      location: `.pv-text-details__left-panel:first-child .pb2 span`,
-      connections: `.pv-top-card--list span`,
+			name: `.text-heading-xlarge`,
+      headline: `.text-body-medium`,
+      location: `.pb2 .text-body-small`,
+      connections: `li.text-body-small`,
       imageurl: {
-		    selector: `img.pv-top-card__photo`,
+				selector: `img.pv-top-card__photo`,
         attribute: 'src'
       }
     }
@@ -32,18 +32,18 @@ const template = {
         selector: 'a',
         attribute: 'href'
       },
-      companyName: 'span.t-bold span',
+      companyName: 'div.t-bold span:first-child',
       location: '.pv-entity__location span:last-child',
       description: '.pv-entity__description',
       date1: '.pv-entity__date-range span:last-child',
       date2: '.pv-entity__bullet-item-v2',
       roles: {
-        selector: 'li',
+        selector: 'div.full-width > div > ul div[data-view-name]',
         hasChildrenFields: true,
         fields: {
-          title: 'span.t-bold span:last-child',
-          description: '.pv-entity__description',
-          date: '.t-14.t-normal:last-child span:first-child',
+          title: 'div.t-bold span:first-child',
+          description: 'div.display-flex div.full-width > span[aria-hidden]',
+          date: '.pvs-entity__caption-wrapper',
           location: '.pv-entity__location span:last-child'
         }
       }
