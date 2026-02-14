@@ -1,7 +1,7 @@
 {
   "name": "@mvegter/scrapedin",
-  "version": "1.0.33",
-  "description": "linkedin scraper for 2020 website",
+  "version": "1.1.0",
+  "description": "linkedin scraper updated for 2025+ website",
   "keywords": [
     "linkedin",
     "scraper",
@@ -21,14 +21,14 @@
   "author": "Wagner Leonardi <leonardiwagner@gmail.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "puppeteer": "14.1.1",
+    "puppeteer": "24.36.0",
     "winston": "3.7.2"
   },
   "devDependencies": {
     "standard": "17.0.0"
   },
   "engines": {
-    "node": ">= 7.6.0"
+    "node": ">= 16.0.0"
   },
   "homepage": "https://github.com/linkedtales/scrapedin#readme"
 }

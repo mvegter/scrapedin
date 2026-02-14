@@ -2,7 +2,7 @@ const logger = require('../logger')(__filename)
 const pkg = require('../package')
 
 module.exports = (profile) => {
-  if(!profile?.profile?.name) {
+  if (!profile?.profile?.name) {
     const messageError = `LinkedIn website changed and ${pkg.name} ${pkg.version} can't read basic data. Please report this issue at ${pkg.bugs.url}`
     logger.error(messageError, '')
     throw new Error(messageError)
@@ -11,17 +11,17 @@ module.exports = (profile) => {
   profile.profile.summary = profile?.about?.text
 
   profile.positions.forEach((position) => {
-    if(position.title){
-        position.title = position.title.replace('Company Name\n', '')
+    if (position.title) {
+      position.title = position.title.replace('Company Name\n', '')
     }
-    if(position.description) {
-      position.description = position.description.replace('See more', '');
-      position.description = position.description.replace('see more', '');
-	    position.description = position.description.replace('See less', '');
+    if (position.description) {
+      position.description = position.description.replace('See more', '')
+      position.description = position.description.replace('see more', '')
+      position.description = position.description.replace('See less', '')
     }
-    if(position.roles) {
+    if (position.roles) {
       position.roles.forEach((role) => {
-        if(role.title) {
+        if (role.title) {
           role.title = role.title.replace('Title\n', '')
         }
         if (role.date) {
@@ -29,7 +29,7 @@ module.exports = (profile) => {
           role.date2 = role.date.replace('·', '-').split('-')[1].trim()
           delete role.date
         }
-        if(role.description) {
+        if (role.description) {
           role.description = role.description.replace('See more', '')
           role.description = role.description.replace('see more', '')
         }
@@ -37,63 +37,62 @@ module.exports = (profile) => {
     }
   })
 
-  if(profile.recommendations.receivedCount) {
+  if (profile.recommendations.receivedCount) {
     profile.recommendations.receivedCount = profile.recommendations.receivedCount.replace(/[^\d]/g, '')
   }
 
-  if(profile.recommendations.givenCount) {
+  if (profile.recommendations.givenCount) {
     profile.recommendations.givenCount = profile.recommendations.givenCount.replace(/[^\d]/g, '')
   }
 
-  if(profile.recommendations.received) {
+  if (profile.recommendations.received) {
     profile.recommendations.received.forEach((recommendation) => {
-      if(recommendation.summary){
+      if (recommendation.summary) {
         recommendation.summary = recommendation.summary.replace('See more', '')
         recommendation.summary = recommendation.summary.replace('See less', '')
       }
     })
   }
 
-  if(profile.recommendations.given) {
+  if (profile.recommendations.given) {
     profile.recommendations.given.forEach((recommendation) => {
-      if(recommendation.summary){
+      if (recommendation.summary) {
         recommendation.summary = recommendation.summary.replace('See more', '')
         recommendation.summary = recommendation.summary.replace('See less', '')
       }
     })
   }
 
-  if(profile.courses){
+  if (profile.courses) {
     profile.courses = profile.courses.map(({ name, year }) => {
       const coursesObj = {}
-      if(name) {
+      if (name) {
         coursesObj.name = name.replace('Course name\n', '')
       }
-      if(year) {
+      if (year) {
         coursesObj.year = year.replace('Course number\n', '')
       }
       return coursesObj
-    }
-    );
+    })
   }
 
-  if(profile.languages){
+  if (profile.languages) {
     profile.languages = profile.languages.map(({ name, proficiency }) => ({
       name: name ? name.replace('Language name\n', '') : undefined,
-      proficiency,
-    }));
+      proficiency
+    }))
   }
 
-  if(profile.projects){
+  if (profile.projects) {
     profile.projects = profile.projects.map(
       ({ name, date, description, link }) => ({
         name: name ? name.replace('Project name\n', '') : undefined,
         date,
         description: description ? description.replace('Project description\n', '') : undefined,
-        link,
-      }),
-    );
+        link
+      })
+    )
   }
-  
+
   return profile
 }

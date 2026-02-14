@@ -14,34 +14,36 @@ module.exports = async (browser, email, password) => {
   await page.$('#password')
     .then((passwordElement) => passwordElement.type(password))
 
-  await page.$x("//button[contains(text(), 'Sign in')]")
-    .then((button) => button[0].click())
+  await page.locator('button[type="submit"]').click()
 
-  return page.waitForSelector('input[role=combobox]', {
-    timeout: 15000
-  })
+  return page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 15000 })
     .then(async () => {
-      logger.info('logged feed page selector found')
-      await page.close()
+      const currentUrl = page.url()
+      if (currentUrl.includes('/feed') || currentUrl.includes('/mynetwork') || currentUrl.includes('/in/')) {
+        logger.info('logged in, redirected to: ' + currentUrl)
+        await page.close()
+        return
+      }
+      throw new Error('unexpected redirect: ' + currentUrl)
     })
     .catch(async () => {
       logger.warn('successful login element was not found')
       const emailError = await page.evaluate(() => {
-        const e = document.querySelector('div[error-for=username]')
+        const e = document.querySelector('div[error-for=username], #error-for-username')
         if (!e) { return false }
         const style = window.getComputedStyle(e)
         return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
       })
 
       const passwordError = await page.evaluate(() => {
-        const e = document.querySelector('div[error-for=password]')
+        const e = document.querySelector('div[error-for=password], #error-for-password')
         if (!e) { return false }
         const style = window.getComputedStyle(e)
         return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
       })
 
       const manualChallengeRequested = await page.evaluate(() => {
-        const e = document.querySelector('.flow-challenge-content')
+        const e = document.querySelector('.flow-challenge-content, #challenge, [data-test-id="challenge"]')
         if (!e) { return false }
         const style = window.getComputedStyle(e)
         return style && style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0'
@@ -57,7 +59,7 @@ module.exports = async (browser, email, password) => {
         return Promise.reject(new Error('linkedin: invalid password'))
       }
 
-      if (page.$(manualChallengeRequested)) {
+      if (manualChallengeRequested) {
         logger.warn('manual check was required')
         return Promise.reject(new Error(`linkedin: manual check was required, verify if your login is properly working manually or report this issue: ${pkg.name} ${pkg.version} ${pkg.bugs.url}`))
       }

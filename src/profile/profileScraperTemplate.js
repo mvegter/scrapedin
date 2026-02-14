@@ -1,189 +1,186 @@
-const profileSelector = '.core-rail > *:first-child section >'
-
 const template = {
   profile: {
-    selector: '.pb5',
+    selector: '.scaffold-layout__main',
     fields: {
-			name: `.text-heading-xlarge`,
-      headline: `.text-body-medium`,
-      location: `.pb2 .text-body-small`,
-      connections: `li.text-body-small`,
+      name: '.text-heading-xlarge',
+      headline: '.text-body-medium',
+      location: '.text-body-small.inline.t-black--light.break-words',
+      connections: '.t-bold',
       imageurl: {
-				selector: `img.pv-top-card__photo`,
+        selector: 'img.pv-top-card-profile-picture__image',
         attribute: 'src'
       }
     }
   },
   about: {
-    selector: '.pv-about-section',
+    selector: '#about ~ .display-flex .inline-show-more-text',
     fields: {
-      text: 'div'
+      text: 'span[aria-hidden="true"]'
     }
   },
   positions: {
-    selector: 'div[id="experience"] + div + div li.artdeco-list__item',
+    selector: '#experience ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      title: 'h3',
+      title: '.mr1.hoverable-link-text.t-bold > span',
       link: {
-        selector: 'a',
-        attribute: 'href',
-      },
-      url: {
-        selector: 'a',
+        selector: 'a.optional-action-target-wrapper',
         attribute: 'href'
       },
-      companyName: 'div.t-bold span:first-child',
-      location: '.pv-entity__location span:last-child',
-      description: '.pv-entity__description',
-      date1: '.pv-entity__date-range span:last-child',
-      date2: '.pv-entity__bullet-item-v2',
+      url: {
+        selector: 'a.optional-action-target-wrapper',
+        attribute: 'href'
+      },
+      companyName: '.t-14.t-normal > span',
+      location: '.t-14.t-normal.t-black--light > span',
+      description: '.pvs-list__outer-container .inline-show-more-text span[aria-hidden="true"]',
+      date1: '.pvs-entity__caption-wrapper',
+      date2: '.pvs-entity__caption-wrapper',
       roles: {
-        selector: 'div.full-width > div > ul div[data-view-name]',
+        selector: '.pvs-entity__sub-components li.pvs-list__paged-list-item',
         hasChildrenFields: true,
         fields: {
-          title: 'div.t-bold span:first-child',
-          description: 'div.display-flex div.full-width > span[aria-hidden]',
+          title: '.mr1.hoverable-link-text.t-bold > span',
+          description: '.inline-show-more-text span[aria-hidden="true"]',
           date: '.pvs-entity__caption-wrapper',
-          location: '.pv-entity__location span:last-child'
+          location: '.t-14.t-normal.t-black--light > span'
         }
       }
     }
   },
   educations: {
-    selector: '#education-section li',
+    selector: '#education ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      title: 'h3',
-      degree: 'span[class=pv-entity__comma-item]',
+      title: '.hoverable-link-text.t-bold > span',
+      degree: '.t-14.t-normal > span',
       url: {
         selector: 'a',
         attribute: 'href'
       },
-	    fieldOfStudy: 'p.pv-entity__fos span:nth-child(2)',
-      date1: '.pv-entity__dates time:nth-child(1)',
-      date2: '.pv-entity__dates time:nth-child(2)',
-      description: '.pv-entity__description'
+      fieldOfStudy: '.t-14.t-normal > span',
+      date1: '.pvs-entity__caption-wrapper',
+      date2: '.pvs-entity__caption-wrapper',
+      description: '.inline-show-more-text span[aria-hidden="true"]'
     }
   },
   skills: {
-    selector: '.pv-skill-category-entity__skill-wrapper',
+    selector: '#skills ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      title: '.pv-skill-category-entity__name-text',
-      count: '.pv-skill-category-entity__endorsement-count'
+      title: '.mr1.hoverable-link-text.t-bold > span',
+      count: '.t-14.t-normal.t-black--light > span'
     }
   },
   recommendationsCount: {
-    selector: '.recommendations-inlining',
+    selector: '#recommendations ~ .pvs-list__outer-container',
     fields: {
       received: '.artdeco-tab:nth-child(1)',
       given: '.artdeco-tab:nth-child(2)'
     }
   },
   recommendationsReceived: {
-    selector: '.recommendations-inlining',
-    fields: {
-      user: {
-        selector: '.pv-recommendation-entity__member',
-        attribute: 'href'
-      },
-      text: 'blockquote.pv-recommendation-entity__text',
-      profileImage: {
-        selector: 'a img',
-        attribute: 'src'
-      },
-      name: {
-        selector: 'a h3'
-      },
-      userDescription: {
-        selector: '.pv-recommendation-entity__headline'
-      }
-    }
-  },
-  recommendationsGiven: {
-    selector: '.artdeco-tabpanel li.pv-recommendation-entity',
-    fields: {
-      user: {
-        selector: '.pv-recommendation-entity__member',
-        attribute: 'href'
-      },
-      text: 'blockquote.pv-recommendation-entity__text',
-      profileImage: {
-        selector: 'a img',
-        attribute: 'src'
-      },
-      name: {
-        selector: 'a h3'
-      },
-      userDescription: {
-        selector: '.pv-recommendation-entity__headline'
-      }
-    }
-  },
-  accomplishments: {
-    selector: '.pv-accomplishments-section > div',
-    fields: {
-      count: 'h3 span:last-child',
-      title: '.pv-accomplishments-block__title',
-      items: {
-        selector: 'li',
-        isMultipleFields: true
-      }
-    }
-  },
-  peopleAlsoViewed: {
-    selector: 'li.pv-browsemap-section__member-container',
+    selector: '#recommendations ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
       user: {
         selector: 'a',
         attribute: 'href'
       },
-      text: 'p',
+      text: '.inline-show-more-text span[aria-hidden="true"]',
       profileImage: {
-        selector: 'a img',
+        selector: 'img',
         attribute: 'src'
       },
       name: {
-        selector: '.name'
+        selector: '.t-bold > span'
+      },
+      userDescription: {
+        selector: '.t-14.t-normal > span'
+      }
+    }
+  },
+  recommendationsGiven: {
+    selector: '#recommendations ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
+    fields: {
+      user: {
+        selector: 'a',
+        attribute: 'href'
+      },
+      text: '.inline-show-more-text span[aria-hidden="true"]',
+      profileImage: {
+        selector: 'img',
+        attribute: 'src'
+      },
+      name: {
+        selector: '.t-bold > span'
+      },
+      userDescription: {
+        selector: '.t-14.t-normal > span'
+      }
+    }
+  },
+  accomplishments: {
+    selector: '#honors_and_awards ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
+    fields: {
+      count: '.t-14.t-normal.t-black--light > span',
+      title: '.mr1.hoverable-link-text.t-bold > span',
+      items: {
+        selector: '.pvs-list__outer-container li',
+        isMultipleFields: true
+      }
+    }
+  },
+  peopleAlsoViewed: {
+    selector: '.pv-browsemap-section li',
+    fields: {
+      user: {
+        selector: 'a',
+        attribute: 'href'
+      },
+      text: '.t-14.t-normal',
+      profileImage: {
+        selector: 'img',
+        attribute: 'src'
+      },
+      name: {
+        selector: '.t-bold'
       }
     }
   },
   volunteerExperience: {
-    selector: 'section.volunteering-section li',
+    selector: '#volunteering_experience ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      title: 'h3',
-      experience: 'span[class=pv-entity__secondary-title]',
-      location: '.pv-entity__location span:nth-child(2)',
-      description: '.pv-volunteer-causes',
-      date1: '.pv-entity__date-range span:nth-child(2)',
-      date2: '.pv-entity__bullet-item'
+      title: '.mr1.hoverable-link-text.t-bold > span',
+      experience: '.t-14.t-normal > span',
+      location: '.t-14.t-normal.t-black--light > span',
+      description: '.inline-show-more-text span[aria-hidden="true"]',
+      date1: '.pvs-entity__caption-wrapper',
+      date2: '.pvs-entity__caption-wrapper'
     }
   },
   courses: {
-    selector: '.pv-accomplishments-section',
+    selector: '#courses ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      name: '.pv-accomplishment-entity__title',
-      year: '.pv-accomplishment-entity__course-number'
+      name: '.mr1.hoverable-link-text.t-bold > span',
+      year: '.t-14.t-normal > span'
     }
   },
   languages: {
-    selector: '.pv-accomplishments-block.languages li',
+    selector: '#languages ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      name: '.pv-accomplishment-entity__title',
-      proficiency: '.pv-accomplishment-entity__proficiency',
+      name: '.mr1.t-bold > span',
+      proficiency: '.t-14.t-normal.t-black--light > span'
     }
   },
   projects: {
-    selector: '.pv-accomplishments-block.projects li',
+    selector: '#projects ~ .pvs-list__outer-container .pvs-list > li.pvs-list__paged-list-item',
     fields: {
-      name: '.pv-accomplishment-entity__title',
-      date: '.pv-accomplishment-entity__date',
-      description: '.pv-accomplishment-entity__description',
+      name: '.mr1.hoverable-link-text.t-bold > span',
+      date: '.pvs-entity__caption-wrapper',
+      description: '.inline-show-more-text span[aria-hidden="true"]',
       link: {
-        selector: '.mt4',
+        selector: 'a',
         attribute: 'href'
       }
     }
   }
 }
-
 
 module.exports = template
