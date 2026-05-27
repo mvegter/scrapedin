@@ -10,52 +10,49 @@ const extractProfileData = async (page) => {
   return page.evaluate(() => {
     const txt = (el) => el ? (el.textContent || '').trim() : ''
 
-    const byViewName = (name) => document.querySelector(`[data-view-name="${name}"]`)
-
-    const getSection = (viewName) => {
-      const el = byViewName(viewName)
-      if (!el) return null
-      return el.querySelector('section') || el.closest('section')
+    const findSection = (headingText) => {
+      const sections = document.querySelectorAll('section')
+      for (const s of sections) {
+        const h2 = s.querySelector('h2')
+        if (h2 && h2.textContent.trim().startsWith(headingText)) return s
+      }
+      return null
     }
 
-    // Get items from a section. For sections without ul/li, items are divs
-    // found after the h2 heading: h2.parent.nextSibling > div > div > div
-    const getSectionItems = (viewName) => {
-      const section = getSection(viewName)
+    const getContentDivs = (section) => {
       if (!section) return []
-      const ul = section.querySelector('ul')
-      if (ul) return [...ul.querySelectorAll(':scope > li')]
       const h2 = section.querySelector('h2')
       if (!h2) return []
-      const afterH2 = h2.parentElement.nextElementSibling
-      if (!afterH2) return []
-      const itemDivs = afterH2.querySelectorAll(':scope > div > div > div')
-      return [...itemDivs].filter(d => d.querySelectorAll('p').length > 0)
+      const content = h2.parentElement?.nextElementSibling
+      if (!content) return []
+      return [...content.querySelectorAll(':scope > div')].filter(d => d.querySelector('p'))
     }
 
-    // Profile top card: name is in h2, headline/location in p tags
-    const titleName = document.title.replace(' | LinkedIn', '').trim()
-    const mainLevel = byViewName('profile-main-level')
-    const topSection = mainLevel ? (mainLevel.querySelector('section') || mainLevel.closest('section')) : null
-    const nameH2 = topSection ? topSection.querySelector('h2') : null
-    const photoImg = document.querySelector('img[src*="profile-displayphoto"]')
+    // Profile top card
+    const sections = document.querySelectorAll('section')
+    let topSection = null
+    for (const s of sections) {
+      const h2 = s.querySelector('h2')
+      if (h2 && ['0 notifications', 'Suggested for you', 'Analytics', 'Activity'].includes(h2.textContent.trim())) continue
+      if (s.textContent.trim().length > 200) { topSection = s; break }
+    }
 
-    const profileName = nameH2 ? txt(nameH2) : titleName
+    const nameH1 = document.querySelector('h1')
+    const profileName = nameH1 ? txt(nameH1) : document.title.replace(' | LinkedIn', '').trim()
     let headline = ''
     let location = ''
-
     if (topSection) {
       const allP = [...topSection.querySelectorAll('p')]
       headline = txt(allP[0])
       for (const p of allP) {
         const t = txt(p)
-        if (t.includes(',') && !t.includes('at ') && !t.includes('\xB7')) {
+        if (t.includes(',') && !t.includes('at ') && !t.includes('\u00B7') && !t.includes('follow')) {
           location = t
           break
         }
       }
     }
-
+    const photoImg = document.querySelector('img[src*="profile-displayphoto"]')
     const profile = {
       name: profileName,
       headline,
@@ -64,101 +61,141 @@ const extractProfileData = async (page) => {
       imageurl: photoImg ? photoImg.getAttribute('src') || '' : ''
     }
 
-    // Experience: uses LazyColumn with company groups containing ul > li
+    // Experience
     const positions = []
-    const expSection = getSection('profile-card-experience')
+    const expSection = findSection('Experience')
     if (expSection) {
-      const lazyCol = expSection.querySelector('[data-component-type]') || expSection
-      const groups = [...lazyCol.children]
-
-      groups.forEach(group => {
-        const ul = group.querySelector('ul')
-        if (!ul) return
-
-        // Company info is in p tags before the ul
-        const allPs = group.querySelectorAll('p')
-        const beforeUlPs = []
-        for (const p of allPs) {
-          if (ul.contains(p)) break
-          beforeUlPs.push(p)
-        }
-        const companyName = txt(beforeUlPs[0])
+      const companyGroups = expSection.querySelectorAll('[componentkey^="entity-collection"]')
+      companyGroups.forEach(group => {
+        const allP = [...group.querySelectorAll('p')].filter(p => txt(p).length > 0)
+        if (allP.length === 0) return
+        const companyName = txt(allP[0])
         const companyLink = group.querySelector('a[href*="/company/"]')
         const companyUrl = companyLink ? companyLink.getAttribute('href') : ''
-        const companyLocation = txt(beforeUlPs[2])
 
-        const lis = [...ul.querySelectorAll(':scope > li')]
-        lis.forEach(li => {
-          const ps = [...li.querySelectorAll('div[role="button"] p')]
-          const descEl = li.querySelector('[data-testid="expandable-text-box"]')
-          const dateStr = txt(ps[2])
-          const dateRange = dateStr.split('\xB7')[0].trim()
+        const positionLis = group.querySelectorAll('ul > li')
+        if (positionLis.length > 0) {
+          positionLis.forEach(li => {
+            const liPs = [...li.querySelectorAll('p')].filter(p => txt(p).length > 0)
+            if (liPs.length === 0) return
+            const descEl = li.querySelector('[data-testid="expandable-text-box"]')
+            let dateStr = ''
+            for (let i = 1; i < liPs.length; i++) {
+              const t = txt(liPs[i])
+              if (t.includes('\u00B7') || /\d{4}/.test(t)) { dateStr = t; break }
+            }
+            const dateRange = dateStr.split('\u00B7')[0].trim()
+            const dateParts = dateRange.split(' - ')
+            positions.push({
+              title: txt(liPs[0]),
+              companyName,
+              link: companyUrl,
+              url: companyUrl,
+              location: '',
+              description: descEl ? txt(descEl) : '',
+              date: dateRange,
+              date1: dateParts[0] ? dateParts[0].trim() : '',
+              date2: dateParts[1] ? dateParts[1].trim() : ''
+            })
+          })
+        } else {
+          const descEl = group.querySelector('[data-testid="expandable-text-box"]')
+          let dateStr = ''
+          for (let i = 1; i < allP.length; i++) {
+            const t = txt(allP[i])
+            if (t.includes('\u00B7') || /\d{4}/.test(t.split(' ')[0])) { dateStr = t; break }
+          }
+          const dateRange = dateStr.split('\u00B7')[0].trim()
           const dateParts = dateRange.split(' - ')
           positions.push({
-            title: txt(ps[0]),
+            title: txt(allP[3]) || txt(allP[1]),
             companyName,
             link: companyUrl,
             url: companyUrl,
-            location: companyLocation,
+            location: txt(allP[2]) || '',
             description: descEl ? txt(descEl) : '',
             date: dateRange,
             date1: dateParts[0] ? dateParts[0].trim() : '',
             date2: dateParts[1] ? dateParts[1].trim() : ''
           })
-        })
+        }
       })
     }
 
     // Education
-    const eduItems = getSectionItems('profile-card-education')
-    const educations = eduItems.map(item => {
-      const ps = [...item.querySelectorAll('p')]
-      const link = item.querySelector('a[href*="/school/"]') ||
-        item.closest('div')?.parentElement?.querySelector('a[href*="/school/"]')
-      return {
+    const educations = []
+    const eduSection = findSection('Education')
+    const eduDivs = getContentDivs(eduSection)
+    eduDivs.forEach(div => {
+      const ps = [...div.querySelectorAll('p')].filter(p => txt(p).length > 0)
+      if (ps.length === 0) return
+      const schoolLink = div.querySelector('a[href*="/school/"]')
+      const url = schoolLink ? schoolLink.getAttribute('href') : ''
+      const dateStr = txt(ps[2]) || ''
+      const dateParts = dateStr.split('\u2013')
+      educations.push({
         title: txt(ps[0]),
-        degree: txt(ps[1]),
-        fieldOfStudy: txt(ps[1]),
-        url: link ? link.getAttribute('href') : '',
-        date1: ps[2] ? txt(ps[2]).split('\u2013')[0].trim() : '',
-        date2: ps[2] ? (txt(ps[2]).split('\u2013')[1] || '').trim() : '',
+        degree: txt(ps[1]) || '',
+        fieldOfStudy: txt(ps[1]) || '',
+        url,
+        date1: dateParts[0] ? dateParts[0].trim() : '',
+        date2: dateParts[1] ? dateParts[1].trim() : '',
         description: ''
-      }
+      })
     })
 
     // Skills
-    const skillItems = getSectionItems('profile-card-skills')
-    const skills = skillItems.map(item => {
-      const ps = [...item.querySelectorAll('p')]
-      return { title: txt(ps[0]), count: '' }
-    })
+    const skills = []
+    const skillsSection = findSection('Skills')
+    if (skillsSection) {
+      const allSectionP = [...skillsSection.querySelectorAll('p')].filter(p => txt(p).length > 0)
+      for (let i = 0; i < allSectionP.length; i += 2) {
+        const name = txt(allSectionP[i])
+        if (name && !name.includes('Show all') && !name.includes('Private')) {
+          skills.push({ title: name, count: '' })
+        }
+      }
+    }
 
     // Languages
-    const langItems = getSectionItems('profile-card-languages')
-    const languages = langItems.map(item => {
-      const ps = [...item.querySelectorAll('p')]
-      return { name: txt(ps[0]), proficiency: txt(ps[1]) }
-    })
+    const languages = []
+    const langSection = findSection('Languages')
+    if (langSection) {
+      const langDivs = getContentDivs(langSection)
+      langDivs.forEach(div => {
+        const ps = [...div.querySelectorAll('p')].filter(p => txt(p).length > 0)
+        for (let i = 0; i < ps.length; i += 2) {
+          const n = txt(ps[i])
+          const pr = ps[i + 1] ? txt(ps[i + 1]) : ''
+          if (n) languages.push({ name: n, proficiency: pr })
+        }
+      })
+    }
 
     // Projects
-    const projItems = getSectionItems('profile-card-projects')
-    const projects = projItems.map(item => {
-      const ps = [...item.querySelectorAll('p')]
-      const descEl = item.querySelector('[data-testid="expandable-text-box"]')
-      const link = item.querySelector('a[href*="http"]')
-      return {
+    const projects = []
+    const projSection = findSection('Projects')
+    const projDivs = getContentDivs(projSection)
+    projDivs.forEach(div => {
+      const ps = [...div.querySelectorAll('p')].filter(p => txt(p).length > 0)
+      if (ps.length === 0) return
+      const descEl = div.querySelector('[data-testid="expandable-text-box"]')
+      const link = div.querySelector('a[href*="http"]')
+      projects.push({
         name: txt(ps[0]),
-        date: txt(ps[1]),
+        date: txt(ps[1]) || '',
         description: descEl ? txt(descEl) : '',
         link: link ? link.getAttribute('href') : ''
-      }
+      })
     })
 
     // Certifications
-    const certItems = getSectionItems('profile-card-licenses-and-certifications')
-    const accomplishments = certItems.map(item => {
-      const ps = [...item.querySelectorAll('p')]
-      return { title: txt(ps[0]), count: '', items: [] }
+    const accomplishments = []
+    const certSection = findSection('Licenses')
+    const certDivs = getContentDivs(certSection)
+    certDivs.forEach(div => {
+      const ps = [...div.querySelectorAll('p')].filter(p => txt(p).length > 0)
+      if (ps.length > 0) accomplishments.push({ title: txt(ps[0]), count: '', items: [] })
     })
 
     return {
@@ -184,9 +221,27 @@ module.exports = async (browser, cookies, url, waitTimeToScrapMs = 500, hasToGet
 
   const page = await openPage({ browser, cookies, url, puppeteerAuthenticate })
 
-  // Wait for the SDUI profile to fully hydrate
+  // Check for authwall (expired session)
+  const isAuthwall = await page.evaluate(() =>
+    window.location.href.includes('/authwall') || document.title.toLowerCase().includes('inschrijven')
+  )
+  if (isAuthwall) {
+    await page.close()
+    throw new Error('authwall: LinkedIn session expired, re-authentication required')
+  }
+
+  // Accept cookie consent if present
+  await page.evaluate(() => {
+    const btn = Array.from(document.querySelectorAll('button')).find(
+      (b) => b.textContent.trim().toLowerCase() === 'accept'
+    )
+    if (btn) btn.click()
+  })
+  await new Promise((r) => setTimeout(r, 2000))
+
+  // Wait for sections to appear (profile content is SDUI rendered)
   await page.waitForFunction(() => {
-    return document.querySelector('[data-view-name="profile-card-experience"]')
+    return document.querySelectorAll('section h2').length > 1
   }, { timeout: 30000 })
     .catch(() => {
       logger.warn('profile content did not fully render in time')

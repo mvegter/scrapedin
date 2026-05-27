@@ -4,7 +4,22 @@ const profile = require('./profile/profile')
 const company = require('./company/company')
 const logger = require('./logger')(__filename)
 
-module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToGetContactInfo, puppeteerArgs, puppeteerAuthenticate, endpoint } = { isHeadless: true, hasToLog: false }) => {
+const saveBrowserCookies = async (browser, cookiesPath) => {
+  if (!cookiesPath) return
+  try {
+    const pages = await browser.pages()
+    if (pages.length > 0) {
+      const pageCookies = await pages[0].cookies()
+      const fs = require('fs')
+      fs.writeFileSync(cookiesPath, JSON.stringify(pageCookies, null, 2))
+      logger.info('cookies saved to: ' + cookiesPath)
+    }
+  } catch (e) {
+    logger.warn('failed to save cookies: ' + e.message)
+  }
+}
+
+module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToGetContactInfo, cookiesPath, puppeteerArgs, puppeteerAuthenticate, endpoint } = { isHeadless: true, hasToLog: false }) => {
   if (!hasToLog) {
     logger.stopLogging()
   }
@@ -26,7 +41,11 @@ module.exports = async ({ cookies, email, password, isHeadless, hasToLog, hasToG
     logger.info('email and password was provided, we\'re going to login...')
 
     try {
-      await login(browser, email, password, logger)
+      const loginResult = await login(browser, email, password, logger)
+      // Only save cookies if login fully completed (no 2FA challenge)
+      if (loginResult && !loginResult.hadChallenge && cookiesPath) {
+        await saveBrowserCookies(browser, cookiesPath)
+      }
     } catch (e) {
       if (!endpoint) {
         await browser.close()

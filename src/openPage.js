@@ -18,6 +18,6 @@ module.exports = async ({ browser, cookies, url, puppeteerAuthenticate }) => {
     await page.authenticate(puppeteerAuthenticate)
   }
 
-  await page.goto(url, { waitUntil: 'load' })
+  await page.goto(url, { waitUntil: 'networkidle2' })
   return page
 }
